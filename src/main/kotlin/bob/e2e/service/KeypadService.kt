@@ -1,16 +1,19 @@
 package bob.e2e.service
 
+import bob.e2e.repository.KeypadRedisRepository
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
-import java.util.Base64
+import java.util.*
 import javax.imageio.ImageIO
 
 @Service
-class KeypadService {
+class KeypadService(private val keypadRedisRepository: KeypadRedisRepository) {
     private val numbers = (0..9).toList()
     private val buttonPositions = listOf(
         Pair(0, 0), Pair(50, 0), Pair(100, 0), Pair(150, 0),
@@ -18,13 +21,16 @@ class KeypadService {
         Pair(0, 100), Pair(50, 100), Pair(100, 100), Pair(150, 100)
     )
 
-    fun generateKeypadImageAndHash(): Pair<String, List<String>> {
+    fun generateKeypadImageAndHash(): Triple<String, List<String>, String> {
         val shuffledButtons = (numbers + listOf("blank", "blank")).shuffled()
         val keypadImage = createKeypadImage(shuffledButtons)
         val base64Image = convertToBase64(keypadImage)
         val hashList = createHashList(shuffledButtons)
+        val sessionId = UUID.randomUUID().toString()
 
-        return Pair(base64Image, hashList)
+        keypadRedisRepository.saveKeypadData(sessionId, shuffledButtons.map { it.toString() }, hashList)
+
+        return Triple(base64Image, hashList, sessionId)
     }
 
     private fun createKeypadImage(shuffledButtons: List<Any>): BufferedImage {
@@ -79,5 +85,17 @@ class KeypadService {
         val md = MessageDigest.getInstance("SHA-256")
         val hashBytes = md.digest(buttonValue.toByteArray())
         return hashBytes.joinToString("") { "%02x".format(it) }
+    }
+    @Autowired
+    private lateinit var redisTemplate: RedisTemplate<String, String>
+
+    fun testRedisConnection() {
+        try {
+            redisTemplate.opsForValue().set("test", "Hello Redis")
+            val value = redisTemplate.opsForValue().get("test")
+            println("Retrieved value from Redis: $value")
+        } catch (e: Exception) {
+            println("Failed to connect to Redis: ${e.message}")
+        }
     }
 }

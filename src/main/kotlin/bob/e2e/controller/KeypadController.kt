@@ -12,9 +12,15 @@ class KeypadController(private val keypadService: KeypadService) {
 
     @GetMapping
     fun getKeypad(): ResponseEntity<KeypadResponse> {
-        val (base64Image, hashList) = keypadService.generateKeypadImageAndHash()
-        return ResponseEntity.ok(KeypadResponse(base64Image, hashList))
+        val (base64Image, hashList, sessionId) = keypadService.generateKeypadImageAndHash()
+        return ResponseEntity.ok(KeypadResponse(base64Image, hashList, sessionId))
+    }
+
+    @GetMapping("/test-redis")
+    fun testRedis(): ResponseEntity<String> {
+        keypadService.testRedisConnection()
+        return ResponseEntity.ok("Redis connection test completed. Check console for results.")
     }
 }
 
-data class KeypadResponse(val keypadImage: String, val hasList: List<String>)
+data class KeypadResponse(val keypadImage: String, val hasList: List<String>, val sessionId: String)
