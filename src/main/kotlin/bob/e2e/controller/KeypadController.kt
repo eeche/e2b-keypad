@@ -12,9 +12,9 @@ class KeypadController(private val keypadService: KeypadService) {
 
     @GetMapping
     fun getKeypad(): ResponseEntity<KeypadResponse> {
-        val base64Image = keypadService.generateKeypadImage()
-        return ResponseEntity.ok(KeypadResponse(base64Image))
+        val (base64Image, hashList) = keypadService.generateKeypadImageAndHash()
+        return ResponseEntity.ok(KeypadResponse(base64Image, hashList))
     }
 }
 
-data class KeypadResponse(val keypadImage: String)
+data class KeypadResponse(val keypadImage: String, val hasList: List<String>)
