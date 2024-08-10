@@ -1,11 +1,11 @@
 package bob.e2e.controller
 
-import bob.e2e.service.KeypadResponse
+import bob.e2e.service.KeypadService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import bob.e2e.dto.KeypadDto
+import bob.e2e.dto.KeypadResponse
 
 @RequestMapping("/keypad")
 @RestController
