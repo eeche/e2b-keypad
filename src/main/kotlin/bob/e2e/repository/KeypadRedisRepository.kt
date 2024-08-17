@@ -11,7 +11,7 @@ class KeypadRedisRepository(private val redisTemplate: RedisTemplate<String, Any
         val key = "keypad:$sessionId"
         val data = buttonValues.zip(hashValues).toMap()
         redisTemplate.opsForHash<String, String>().putAll(key, data)
-        redisTemplate.expire(key, 5, TimeUnit.MINUTES) // 5분 후 만료
+        redisTemplate.expire(key, 1, TimeUnit.MINUTES) // 1분 후 만료
     }
 
     fun getButtonValue(sessionId: String, hashValue: String): String? {

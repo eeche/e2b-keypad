@@ -82,7 +82,7 @@ class KeypadService(private val keypadRedisRepository: KeypadRedisRepository) {
 
 //    SHA-256 알고리즘으로 해시화
     private fun hashButton(buttonValue: String): String {
-        val md = MessageDigest.getInstance("SHA-256")
+        val md = MessageDigest.getInstance("SHA-1")
         val hashBytes = md.digest(buttonValue.toByteArray())
         return hashBytes.joinToString("") { "%02x".format(it) }
     }
