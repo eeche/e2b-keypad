@@ -17,10 +17,9 @@ class KeypadController(private val keypadService: KeypadService) {
     }
 
     @PostMapping("/verify")
-    fun verifyInput(@RequestBody request: VerifyRequest): ResponseEntity<Any> {
+    fun verifyInput(@RequestBody request: VerifyRequest): String {
         val authResponse = keypadService.sendAuthRequest(request.encryptedData, request.sessionId)
-        print(authResponse)
-        return ResponseEntity.ok(authResponse)
+        return authResponse
     }
 
     @GetMapping("/test-redis")

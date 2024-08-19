@@ -74,7 +74,7 @@ class KeypadService(private val keypadRedisRepository: KeypadRedisRepository,
         return Base64.getEncoder().encodeToString(outputStream.toByteArray())
     }
 
-//    shuffled된 버튼 리스트를 받아 각 버튼에 대한 해시값 리스트를 생성
+//    shuffled 된 버튼 리스트를 받아 각 버튼에 대한 해시값 리스트를 생성
     private fun createHashList(shuffledButtons: List<Any>): List<String> {
         return shuffledButtons.map { button ->
             when (button) {
@@ -93,19 +93,16 @@ class KeypadService(private val keypadRedisRepository: KeypadRedisRepository,
     @Autowired
     private lateinit var redisTemplate: RedisTemplate<String, String>
 
-    fun sendAuthRequest(encryptedData: String, sessionId: String): Any {
+    fun sendAuthRequest(encryptedData: String, sessionId: String): String {
         val keyHashMap = keypadRedisRepository.getKeyHashMap(sessionId)
-        val keyLength = keyHashMap.values.firstOrNull()?.length ?: 0
-
         val authRequest = AuthRequest(
             userInput = encryptedData,
-            keyHashMap = keyHashMap,
-            keyLength = keyLength
+            keyHashMap = keyHashMap
         )
 
         val authUrl = "http://146.56.119.112:8081/auth"
-        return restTemplate.postForObject(authUrl, authRequest, Any::class.java)
-            ?: throw RuntimeException("Failed to get response from auth endpoint")
+        val response = restTemplate.postForObject(authUrl, authRequest, String::class.java)
+        return response ?: throw RuntimeException("Failed to get response from auth endpoint")
     }
 
     fun testRedisConnection() {
