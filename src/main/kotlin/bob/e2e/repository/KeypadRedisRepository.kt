@@ -14,8 +14,13 @@ class KeypadRedisRepository(private val redisTemplate: RedisTemplate<String, Any
         redisTemplate.expire(key, 1, TimeUnit.MINUTES) // 1분 후 만료
     }
 
-    fun getButtonValue(sessionId: String, hashValue: String): String? {
+    fun getKeyHashMap(sessionId: String): Map<String, String> {
         val key = "keypad:$sessionId"
-        return redisTemplate.opsForHash<String, String>().get(key, hashValue) as String?
+        return redisTemplate.opsForHash<String, String>().entries(key)
     }
+
+//    fun getButtonValue(sessionId: String, hashValue: String): String? {
+//        val key = "keypad:$sessionId"
+//        return redisTemplate.opsForHash<String, String>().get(key, hashValue) as String?
+//    }
 }

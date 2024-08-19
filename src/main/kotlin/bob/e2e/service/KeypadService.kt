@@ -1,10 +1,12 @@
 package bob.e2e.service
 
+import bob.e2e.dto.AuthRequest
 import bob.e2e.repository.KeypadRedisRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestTemplate
 import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
@@ -13,7 +15,9 @@ import java.util.*
 import javax.imageio.ImageIO
 
 @Service
-class KeypadService(private val keypadRedisRepository: KeypadRedisRepository) {
+class KeypadService(private val keypadRedisRepository: KeypadRedisRepository,
+                    private val restTemplate: RestTemplate
+) {
     private val numbers = (0..9).toList()
     private val buttonPositions = listOf(
         Pair(0, 0), Pair(50, 0), Pair(100, 0), Pair(150, 0),
@@ -88,6 +92,21 @@ class KeypadService(private val keypadRedisRepository: KeypadRedisRepository) {
     }
     @Autowired
     private lateinit var redisTemplate: RedisTemplate<String, String>
+
+    fun sendAuthRequest(encryptedData: String, sessionId: String): Any {
+        val keyHashMap = keypadRedisRepository.getKeyHashMap(sessionId)
+        val keyLength = keyHashMap.values.firstOrNull()?.length ?: 0
+
+        val authRequest = AuthRequest(
+            userInput = encryptedData,
+            keyHashMap = keyHashMap,
+            keyLength = keyLength
+        )
+
+        val authUrl = "http://146.56.119.112:8081/auth"
+        return restTemplate.postForObject(authUrl, authRequest, Any::class.java)
+            ?: throw RuntimeException("Failed to get response from auth endpoint")
+    }
 
     fun testRedisConnection() {
         try {
